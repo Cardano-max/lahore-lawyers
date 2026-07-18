@@ -278,7 +278,7 @@ function startPhotoPrecache(){
     const pill = $('offlineBanner');
     let done = 0, i = 0, active = 0;
     const total = urls.length;
-    const CONC = 6;
+    const CONC = 3;
     function tick(){
       pill.innerHTML = `<span class="dot"></span>Saving photos for offline… ${Math.round(done/total*100)}%`;
       pill.hidden = false;
@@ -299,7 +299,7 @@ function startPhotoPrecache(){
         next();
       });
     }
-    // start after a short idle so first paint & searches stay snappy
-    setTimeout(()=>{ tick(); for(let k=0;k<CONC;k++) next(); }, 4000);
+    // start after an idle period so first paint & searches stay snappy
+    setTimeout(()=>{ tick(); for(let k=0;k<CONC;k++) next(); }, 6000);
   }catch(e){/* non-fatal */}
 }

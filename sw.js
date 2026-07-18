@@ -1,5 +1,5 @@
 /* Lahore Lawyers — service worker.  Bump VERSION to force an update. */
-const VERSION = 'll-v2';
+const VERSION = 'll-v3';
 const SHELL = 'shell-' + VERSION;
 const PHOTOS = 'photos-v1';   // stable across app updates so photos aren't re-downloaded
 

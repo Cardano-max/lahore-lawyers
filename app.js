@@ -7,6 +7,7 @@ let filtered = [];
 let rendered = 0;
 const BATCH = 18;
 let activeChip = null;
+const FILTERS = { voters:false, photo:false, phone:false };
 
 const $ = (id) => document.getElementById(id);
 const results = $('results');
@@ -47,43 +48,38 @@ function lev(a,b){
   return dp[m][n];
 }
 
-/* ---------------- Search ---------------- */
-function search(qRaw){
-  const q = norm(qRaw);
-  if(!q){
-    filtered = [];
-    emptyState.hidden = false;
-    noResults.hidden = true;
-    statusBar.hidden = true;
-    results.innerHTML = '';
-    return;
-  }
-  const tokens = q.split(' ').filter(Boolean);
-  emptyState.hidden = true;
+/* ---------------- Search + filters ---------------- */
+function anyFilterActive(){ return FILTERS.voters || FILTERS.photo || FILTERS.phone; }
+function passFilters(l){
+  if(FILTERS.voters && !l.v) return false;
+  if(FILTERS.photo && !l.p) return false;
+  if(FILTERS.phone && !l.t) return false;
+  return true;
+}
 
+// Returns lawyers matching the text query, ranked. Empty query -> all (name order).
+function queryMatches(qRaw){
+  const q = norm(qRaw);
+  if(!q) return LAWYERS.slice();
+  const tokens = q.split(' ').filter(Boolean);
   const scored = [];
   for(let i=0;i<LAWYERS.length;i++){
-    const l = LAWYERS[i];
-    const s = l._s;
+    const s = LAWYERS[i]._s;
     let ok = true, score = 0;
     for(const t of tokens){
-      const idx = s.indexOf(t);
-      if(idx === -1){ ok = false; break; }
-      // boost: word-boundary / area match
+      if(s.indexOf(t) === -1){ ok = false; break; }
       if(s.startsWith(t) || s.indexOf(' '+t) !== -1) score += 5;
-      if(l._a && l._a.indexOf(t) !== -1) score += 8; // area field hit
+      if(LAWYERS[i]._a && LAWYERS[i]._a.indexOf(t) !== -1) score += 8;
       score += 1;
     }
     if(ok) scored.push([score, i]);
   }
-
-  // Fuzzy fallback on area vocabulary if nothing found
   if(scored.length === 0 && tokens.length === 1 && tokens[0].length >= 4){
     const t = tokens[0];
     let bestArea = null, bestD = 3;
     for(const [name] of AREAS){
       for(const w of norm(name).split(' ')){
-        if(w.length<4) continue;
+        if(w.length < 4) continue;
         const d = lev(t, w);
         if(d < bestD){ bestD = d; bestArea = norm(name); }
       }
@@ -94,20 +90,44 @@ function search(qRaw){
       }
     }
   }
-
   scored.sort((a,b)=> b[0]-a[0]);
-  filtered = scored.map(x=>LAWYERS[x[1]]);
+  return scored.map(x=>LAWYERS[x[1]]);
+}
+
+function apply(){
+  const qRaw = searchEl.value.trim();
+  const hasQuery = !!norm(qRaw);
+  const hasFilter = anyFilterActive();
+
+  if(!hasQuery && !hasFilter){
+    filtered = [];
+    results.innerHTML = '';
+    emptyState.hidden = false;
+    noResults.hidden = true;
+    statusBar.hidden = true;
+    return;
+  }
+
+  emptyState.hidden = true;
+  filtered = queryMatches(qRaw).filter(passFilters);
 
   results.innerHTML = '';
   rendered = 0;
   noResults.hidden = filtered.length > 0;
   statusBar.hidden = false;
-  const loc = qRaw.trim();
+
+  const bits = [];
+  if(FILTERS.voters) bits.push('voters 2026');
+  if(FILTERS.photo) bits.push('with photo');
+  if(FILTERS.phone) bits.push('with phone');
+  const suffix = bits.length ? ` &middot; <span style="color:var(--muted)">${bits.join(', ')}</span>` : '';
   statusBar.innerHTML = filtered.length
-    ? `<b>${filtered.length.toLocaleString()}</b>&nbsp;${filtered.length===1?'lawyer':'lawyers'} found`
+    ? `<b>${filtered.length.toLocaleString()}</b>&nbsp;${filtered.length===1?'lawyer':'lawyers'}${suffix}`
     : '';
   renderMore();
 }
+// Back-compat alias
+const search = apply;
 
 /* ---------------- Rendering ---------------- */
 function cardHTML(l){
@@ -184,6 +204,19 @@ function buildChips(){
   });
 }
 
+/* ---------------- Filters ---------------- */
+function initFilters(){
+  document.querySelectorAll('.filter-pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.f;
+      FILTERS[key] = !FILTERS[key];
+      btn.classList.toggle('active', FILTERS[key]);
+      apply();
+      window.scrollTo({top:0});
+    });
+  });
+}
+
 /* ---------------- Events ---------------- */
 let debounce;
 searchEl.addEventListener('input', (e)=>{
@@ -215,6 +248,7 @@ async function boot(){
       l._a = norm(l.a||'');
     }
     buildChips();
+    initFilters();
     loader.classList.add('hidden');
     searchEl.focus();
     startPhotoPrecache();

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#0f6e52" />
+<title>Lahore Lawyers — Directory</title>
+<meta name="description" content="Find lawyers of the Lahore Bar Association by area. Works offline." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Lahore Lawyers" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header" id="appHeader">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l-6 3m6-3l6 3M6 6l-3 6a3 3 0 0 0 6 0L6 6zm12 0l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Lahore Lawyers</h1>
+          <p>Lahore Bar Association · 2026</p>
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" type="search" inputmode="search" autocomplete="off"
+               placeholder="Search your area…  e.g. Model Town" aria-label="Search by area or name" />
+        <button id="clearBtn" class="clear-btn" aria-label="Clear" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="chips" id="chips"></div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="status-bar" id="statusBar" hidden></div>
+    <div id="results" class="results"></div>
+    <div id="sentinel" class="sentinel"></div>
+
+    <div id="emptyState" class="empty-state">
+      <div class="empty-illustration" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l-6 3m6-3l6 3M6 6l-3 6a3 3 0 0 0 6 0L6 6zm12 0l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>
+      </div>
+      <h2>Find a lawyer near you</h2>
+      <p>Type the name of your area — like <b>Model Town</b>, <b>Johar Town</b> or <b>Gulberg</b> — to see every lawyer there.</p>
+    </div>
+
+    <div id="noResults" class="empty-state" hidden>
+      <div class="empty-illustration" aria-hidden="true">🔍</div>
+      <h2>No lawyers found</h2>
+      <p>Try a shorter word or a nearby area.</p>
+    </div>
+  </main>
+
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+    <p>Loading directory…</p>
+  </div>
+
+  <div id="offlineBanner" class="offline-banner" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

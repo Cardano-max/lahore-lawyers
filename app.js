@@ -102,9 +102,10 @@ function apply(){
   if(!hasQuery && !hasFilter){
     filtered = [];
     results.innerHTML = '';
-    emptyState.hidden = false;
-    noResults.hidden = true;
+    statusBar.innerHTML = '';
     statusBar.hidden = true;
+    noResults.hidden = true;
+    emptyState.hidden = false;
     return;
   }
 
@@ -249,6 +250,8 @@ async function boot(){
     }
     buildChips();
     initFilters();
+    const tb = document.getElementById('totalBadge');
+    if(tb) tb.textContent = LAWYERS.length.toLocaleString() + ' lawyers in the directory';
     loader.classList.add('hidden');
     searchEl.focus();
     startPhotoPrecache();

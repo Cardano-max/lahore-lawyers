@@ -65,6 +65,23 @@ body{
 }
 .clear-btn:active{background:#e6ede9}
 
+.suggestions{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:70;
+  background:#fff;border-radius:16px;box-shadow:0 14px 34px rgba(10,50,40,.28);
+  overflow:hidden auto;max-height:min(360px,60vh);
+}
+.suggestion{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);
+}
+.suggestion:last-child{border-bottom:none}
+.suggestion:active,.suggestion.hi{background:var(--surface-2)}
+.suggestion .s-left{display:flex;align-items:center;gap:11px;min-width:0}
+.suggestion .s-pin{color:var(--primary-2);flex:0 0 auto}
+.suggestion .s-name{font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.suggestion .s-name b{color:var(--primary-ink);background:#e8f3ee}
+.suggestion .s-count{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}
+
 .chips{
   display:flex;gap:9px;margin-top:13px;overflow-x:auto;padding-bottom:3px;
   scrollbar-width:none;-ms-overflow-style:none;

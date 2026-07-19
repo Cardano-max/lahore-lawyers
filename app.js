@@ -18,6 +18,7 @@ const emptyState = $('emptyState');
 const noResults = $('noResults');
 const loader = $('loader');
 const chipsEl = $('chips');
+const suggestionsEl = $('suggestions');
 
 /* ---------------- Text utils ---------------- */
 function norm(s){
@@ -205,6 +206,39 @@ function buildChips(){
   });
 }
 
+/* ---------------- Suggestions (autocomplete) ---------------- */
+const PIN_SVG = '<svg class="s-pin" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+function hideSuggestions(){ suggestionsEl.hidden = true; suggestionsEl.innerHTML = ''; }
+function renderSuggestions(raw){
+  const q = norm(raw);
+  if(!q){ hideSuggestions(); return; }
+  const matches = AREAS.filter(([name]) => norm(name).includes(q)).slice(0, 8);
+  if(!matches.length){ hideSuggestions(); return; }
+  const lc = raw.trim().toLowerCase();
+  suggestionsEl.innerHTML = matches.map(([name, count])=>{
+    let disp = name;
+    const i = name.toLowerCase().indexOf(lc);
+    if(lc && i >= 0) disp = name.slice(0,i) + '<b>' + name.slice(i,i+lc.length) + '</b>' + name.slice(i+lc.length);
+    return `<div class="suggestion" data-area="${name.replace(/"/g,'&quot;')}">
+      <span class="s-left">${PIN_SVG}<span class="s-name">${disp}</span></span>
+      <span class="s-count">${count.toLocaleString()} lawyers</span></div>`;
+  }).join('');
+  suggestionsEl.hidden = false;
+}
+suggestionsEl.addEventListener('click', (e)=>{
+  const el = e.target.closest('.suggestion');
+  if(!el) return;
+  const name = el.dataset.area;
+  searchEl.value = name; clearBtn.hidden = false;
+  hideSuggestions();
+  if(activeChip){ activeChip.classList.remove('active'); activeChip = null; }
+  apply(); window.scrollTo({top:0});
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.search-wrap')) hideSuggestions();
+});
+searchEl.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hideSuggestions(); });
+
 /* ---------------- Filters ---------------- */
 function initFilters(){
   document.querySelectorAll('.filter-pill').forEach(btn=>{
@@ -223,12 +257,14 @@ let debounce;
 searchEl.addEventListener('input', (e)=>{
   clearBtn.hidden = !e.target.value;
   if(activeChip){ activeChip.classList.remove('active'); activeChip=null; }
+  renderSuggestions(e.target.value);
   clearTimeout(debounce);
   debounce = setTimeout(()=>search(e.target.value), 110);
 });
 clearBtn.addEventListener('click', ()=>{
   searchEl.value=''; clearBtn.hidden=true; searchEl.focus();
   if(activeChip){ activeChip.classList.remove('active'); activeChip=null; }
+  hideSuggestions();
   search('');
 });
 
